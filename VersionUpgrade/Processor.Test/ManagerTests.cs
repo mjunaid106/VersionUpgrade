@@ -22,7 +22,8 @@ namespace Processor.Test
             _index = new MockIndex();
             _indexReadWriteLock = new ReaderWriterLockSlim();
             _sourceReadWriteLock = new ReaderWriterLockSlim();
-            _manager = new Manager(_source, _index, _indexReadWriteLock, _sourceReadWriteLock);
+            _manager = new Manager(_index);
+            _manager.Source = _source;
         }
 
         [TestMethod]

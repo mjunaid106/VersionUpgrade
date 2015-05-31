@@ -13,5 +13,10 @@ namespace Processor.Test.MockObjects
         {
             throw new NotImplementedException();
         }
+
+        public bool IsSourceProcessed(ISource source)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

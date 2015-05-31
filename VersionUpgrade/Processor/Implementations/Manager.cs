@@ -7,31 +7,32 @@ namespace Processor.Implementations
 {
     public class Manager : IManager
     {
-        private readonly ISource _source;
-        private readonly IIndex _index;
-        private static ReaderWriterLockSlim _indexReadWriteLock;
-        private static ReaderWriterLockSlim _sourceReadWriteLock;
+        public ISource Source { get; set; }
+        //private readonly IIndex _index;
+        public IIndex Index { get; set; }
+        //private static ReaderWriterLockSlim _indexReadWriteLock;
+        //private static ReaderWriterLockSlim _sourceReadWriteLock;
+        private static readonly object SyncRoot = new object();
 
-        public Manager(ISource source, IIndex index, ReaderWriterLockSlim indexReadWriteLock, ReaderWriterLockSlim sourceReadWriteLock)
+        public Manager(IIndex index)
         {
-            _source = source;
-            _index = index;
-            _indexReadWriteLock = indexReadWriteLock;
-            _sourceReadWriteLock = sourceReadWriteLock;
+            Index = index;
+           // _indexReadWriteLock = indexReadWriteLock;
+           // _sourceReadWriteLock = sourceReadWriteLock;
         }
 
         public string Read()
         {
             string sourceData;
 
-            _sourceReadWriteLock.EnterReadLock();
+            //_sourceReadWriteLock.EnterReadLock();
             try
             {
-                sourceData = _source.ReadData();
+                sourceData = Source.ReadData();
             }
             finally
             {
-                _sourceReadWriteLock.ExitReadLock();
+                //_sourceReadWriteLock.ExitReadLock();
             }
             return sourceData;
         }
@@ -51,7 +52,7 @@ namespace Processor.Implementations
             version[1] = (Convert.ToInt32(version[1]) + 1).ToString();
             string updatedVersions = string.Join(".", version);
 
-            _source.Versions(match.Value, updatedVersions);
+            Source.Versions(match.Value, updatedVersions);
 
             return string.Join(".", version);
         }
@@ -60,15 +61,15 @@ namespace Processor.Implementations
         {
             try
             {
-                _sourceReadWriteLock.EnterWriteLock();
-                try
+                //_sourceReadWriteLock.EnterWriteLock();
+                lock (SyncRoot)
                 {
-                    _source.WriteData(updatedText);
+                    Source.WriteData(updatedText);
                 }
-                finally
-                {
-                    _sourceReadWriteLock.ExitWriteLock();
-                }
+                //finally
+                //{
+                //   // _sourceReadWriteLock.ExitWriteLock();
+                //}
                 return true;
             }
             catch (Exception)
@@ -79,15 +80,15 @@ namespace Processor.Implementations
 
         public void UpdateIndex()
         {
-            _indexReadWriteLock.EnterWriteLock();
-            try
+            //_indexReadWriteLock.EnterWriteLock();
+            //lock (SyncRoot)
             {
-                _index.Update(_source);
+                Index.Update(Source);
             }
-            finally
-            {
-                _indexReadWriteLock.ExitWriteLock();
-            }
+            //finally
+            //{
+            //    //_indexReadWriteLock.ExitWriteLock();
+            //}
         }
     }
 }
