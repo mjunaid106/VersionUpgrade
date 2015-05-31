@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Processor.Implementations;
 using Processor.Interfaces;
 using Processor.Test.MockObjects;
@@ -6,16 +7,22 @@ using Processor.Test.MockObjects;
 namespace Processor.Test
 {
     [TestClass]
-    public class ProcessorTests
+    public class ManagerTests
     {
         private ISource _source;
         private IManager _manager;
+        private IIndex _index;
+        private ReaderWriterLockSlim _indexReadWriteLock;
+        private ReaderWriterLockSlim _sourceReadWriteLock;
 
         [TestInitialize]
         public void Initialise()
         {
             _source = new MockSource();
-            _manager = new Manager(_source);
+            _index = new MockIndex();
+            _indexReadWriteLock = new ReaderWriterLockSlim();
+            _sourceReadWriteLock = new ReaderWriterLockSlim();
+            _manager = new Manager(_source, _index, _indexReadWriteLock, _sourceReadWriteLock);
         }
 
         [TestMethod]
@@ -79,6 +86,12 @@ namespace Processor.Test
         {
             var updatedString = _manager.Update("REM v1.1.0 version 1.1");
             Assert.AreEqual("REM v1.2.0 version 1.2", updatedString);
+        }
+
+        [TestMethod]
+        public void ReserveIndex_Successful()
+        {
+
         }
     }
 }

@@ -7,9 +7,14 @@ namespace Processor.Implementations
     {
         private readonly string _filePath;
 
+        public string OldVersion { get; set; }
+        public string NewVersion { get; set; }
+        public string RecordName { get; set; }
+
         public Source(string filePath)
         {
             _filePath = filePath;
+            RecordName = filePath;
         }
 
         public string ReadData()
@@ -28,6 +33,12 @@ namespace Processor.Implementations
             {
                 return false;
             }
+        }
+
+        public void Versions(string oldVersion, string newVersion)
+        {
+            OldVersion = oldVersion;
+            NewVersion = newVersion;
         }
     }
 }

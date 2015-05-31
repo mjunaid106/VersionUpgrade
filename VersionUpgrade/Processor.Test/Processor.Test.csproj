@@ -50,8 +50,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="MockObjects\MockIndex.cs" />
     <Compile Include="MockObjects\MockSource.cs" />
-    <Compile Include="ProcessorTests.cs" />
+    <Compile Include="ManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -2,10 +2,9 @@
 {
     public interface IManager
     {
-        void ReserveIndex();
-        void ReleaseIndex();
+        void UpdateIndex();
         string Read();
         string Update(string originalText);
-        void Write(string updatedText);
+        bool Write(string updatedText);
     }
 }
