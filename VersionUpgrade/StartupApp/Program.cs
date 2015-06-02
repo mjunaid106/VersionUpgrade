@@ -23,7 +23,7 @@ namespace StartupApp
 
             var tasks = new List<Task>();
             var manager = new Manager(index);
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 5; i++)
             {
                 tasks.Add(Task.Run(() => Process(Task.CurrentId, files, manager)));
             }
