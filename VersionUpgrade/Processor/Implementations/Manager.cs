@@ -8,31 +8,29 @@ namespace Processor.Implementations
     public class Manager : IManager
     {
         public ISource Source { get; set; }
-        //private readonly IIndex _index;
-        public IIndex Index { get; set; }
-        //private static ReaderWriterLockSlim _indexReadWriteLock;
-        //private static ReaderWriterLockSlim _sourceReadWriteLock;
-        private static readonly object SyncRoot = new object();
+        private IIndex Index;
+        private static ReaderWriterLockSlim _sourceReadWriteLock;
+        private static ReaderWriterLockSlim _indexReadWriteLock;
 
         public Manager(IIndex index)
         {
             Index = index;
-           // _indexReadWriteLock = indexReadWriteLock;
-           // _sourceReadWriteLock = sourceReadWriteLock;
+            _sourceReadWriteLock = new ReaderWriterLockSlim();
+            _indexReadWriteLock = new ReaderWriterLockSlim();
         }
 
         public string Read()
         {
             string sourceData;
 
-            //_sourceReadWriteLock.EnterReadLock();
+            _sourceReadWriteLock.EnterReadLock();
             try
             {
                 sourceData = Source.ReadData();
             }
             finally
             {
-                //_sourceReadWriteLock.ExitReadLock();
+                _sourceReadWriteLock.ExitReadLock();
             }
             return sourceData;
         }
@@ -59,36 +57,51 @@ namespace Processor.Implementations
 
         public bool Write(string updatedText)
         {
-            try
-            {
-                //_sourceReadWriteLock.EnterWriteLock();
-                lock (SyncRoot)
+            //try
+            //{
+                _indexReadWriteLock.EnterReadLock();
+                _sourceReadWriteLock.EnterWriteLock();
+                try
                 {
                     Source.WriteData(updatedText);
+                    Index.Update(0, Source);
                 }
-                //finally
-                //{
-                //   // _sourceReadWriteLock.ExitWriteLock();
-                //}
+                finally
+                {
+                    _sourceReadWriteLock.ExitWriteLock();
+                }
                 return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public void UpdateIndex()
-        {
-            //_indexReadWriteLock.EnterWriteLock();
-            //lock (SyncRoot)
-            {
-                Index.Update(Source);
-            }
-            //finally
+            //}
+            //catch (Exception)
             //{
-            //    //_indexReadWriteLock.ExitWriteLock();
+            //    return false;
             //}
         }
+
+        public bool IsSourceAlreadyProcessed(ISource source)
+        {
+            bool isProcessed;
+
+            _indexReadWriteLock.EnterReadLock();
+
+            try
+            {
+                isProcessed = Index.IsSourceProcessed(source);
+            }
+            finally
+            {
+                _indexReadWriteLock.ExitReadLock();
+            }
+            return isProcessed;
+        }
+
+        //public void UpdateIndex(int thread)
+        //{
+        //    _indexReadWriteLock.EnterWriteLock();
+        //    Index.Update(thread, Source);
+        //    _indexReadWriteLock.ExitWriteLock();
+        //    _indexReadWriteLock.ExitReadLock();
+        //}
+
     }
 }

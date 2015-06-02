@@ -23,24 +23,24 @@ namespace StartupApp
 
             var tasks = new List<Task>();
             var manager = new Manager(index);
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    tasks.Add(Task.Run(() => Process(files, manager)));
-            //}
-            Process(files, manager);
+            for (int i = 0; i < 2; i++)
+            {
+                tasks.Add(Task.Run(() => Process(Task.CurrentId, files, manager)));
+            }
             Console.WriteLine("Total files processed: {0}", files.Count());
             Console.Read();
 
         }
 
-        private static void Process(IEnumerable<string> files, IManager manager)
+        private static void Process(int? thread, IEnumerable<string> files, IManager manager)
         {
             foreach (string file in files)
             {
                 Console.WriteLine("Processing file: {0}", file);
                 var source = new Source(file);
-                bool isProcessed = manager.Index.IsSourceProcessed(source);
-                if (!isProcessed)
+               // bool isProcessed = manager.IsSourceAlreadyProcessed(source);
+
+                //if (!isProcessed)
                 {
                     manager.Source = source;
                     var originalData = manager.Read();
@@ -48,10 +48,10 @@ namespace StartupApp
                     var isSuccess = manager.Write(updatedData);
                     Console.WriteLine("   Old Version: {0}", source.OldVersion);
                     Console.WriteLine("   New Version: {0}", source.NewVersion);
-                    if (isSuccess)
-                    {
-                        manager.UpdateIndex();
-                    }
+                    //if (isSuccess)
+                    //{
+                    //    manager.UpdateIndex(thread.Value);
+                    //}
                 }
             }
         }

@@ -2,7 +2,7 @@
 {
     public interface IIndex
     {
-        void Update(ISource source);
+        void Update(int thread, ISource source);
         bool IsSourceProcessed(ISource source);
     }
 }

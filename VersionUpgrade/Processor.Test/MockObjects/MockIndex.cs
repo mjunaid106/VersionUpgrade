@@ -9,12 +9,18 @@ namespace Processor.Test.MockObjects
 {
     public class MockIndex : IIndex
     {
-        public void Update(ISource source)
+        public void Update(int thread, ISource source)
         {
             throw new NotImplementedException();
         }
 
         public bool IsSourceProcessed(ISource source)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public void RecordAlreadyProcessed(int thread, ISource source)
         {
             throw new NotImplementedException();
         }
