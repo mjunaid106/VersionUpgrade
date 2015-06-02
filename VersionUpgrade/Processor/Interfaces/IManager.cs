@@ -7,7 +7,7 @@
         //void UpdateIndex(int thread);
         string Read();
         string Update(string originalText);
-        bool Write(string updatedText);
+        bool Write(int threadId, string updatedText);
         bool IsSourceAlreadyProcessed(ISource source);
     }
 }

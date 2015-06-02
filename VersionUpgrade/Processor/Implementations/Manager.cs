@@ -55,22 +55,26 @@ namespace Processor.Implementations
             return string.Join(".", version);
         }
 
-        public bool Write(string updatedText)
+        public bool Write(int threadId, string updatedText)
         {
             //try
             //{
-                _indexReadWriteLock.EnterReadLock();
-                _sourceReadWriteLock.EnterWriteLock();
-                try
+            _indexReadWriteLock.EnterWriteLock();
+            _sourceReadWriteLock.EnterWriteLock();
+            try
+            {
+                Source.WriteData(updatedText);
+                if (!IsSourceAlreadyProcessed(Source))
                 {
-                    Source.WriteData(updatedText);
-                    Index.Update(0, Source);
+                    Index.Update(threadId, Source);
                 }
-                finally
-                {
-                    _sourceReadWriteLock.ExitWriteLock();
-                }
-                return true;
+            }
+            finally
+            {
+                _indexReadWriteLock.ExitWriteLock();
+                _sourceReadWriteLock.ExitWriteLock();
+            }
+            return true;
             //}
             //catch (Exception)
             //{
@@ -82,7 +86,7 @@ namespace Processor.Implementations
         {
             bool isProcessed;
 
-            _indexReadWriteLock.EnterReadLock();
+            //_indexReadWriteLock.EnterReadLock();
 
             try
             {
@@ -90,7 +94,7 @@ namespace Processor.Implementations
             }
             finally
             {
-                _indexReadWriteLock.ExitReadLock();
+                //_indexReadWriteLock.ExitReadLock();
             }
             return isProcessed;
         }

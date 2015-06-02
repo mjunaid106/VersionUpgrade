@@ -38,14 +38,14 @@ namespace StartupApp
             {
                 Console.WriteLine("Processing file: {0}", file);
                 var source = new Source(file);
-               // bool isProcessed = manager.IsSourceAlreadyProcessed(source);
+                // bool isProcessed = manager.IsSourceAlreadyProcessed(source);
 
                 //if (!isProcessed)
                 {
                     manager.Source = source;
                     var originalData = manager.Read();
                     var updatedData = manager.Update(originalData);
-                    var isSuccess = manager.Write(updatedData);
+                    var isSuccess = manager.Write(thread.Value, updatedData);
                     Console.WriteLine("   Old Version: {0}", source.OldVersion);
                     Console.WriteLine("   New Version: {0}", source.NewVersion);
                     //if (isSuccess)
