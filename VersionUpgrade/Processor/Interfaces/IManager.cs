@@ -4,10 +4,12 @@
     {
         ISource Source { get; set; }
 
-        //void UpdateIndex(int thread);
         string Read();
         string Update(string originalText);
-        bool Write(int threadId, string updatedText);
+        void Write(int threadId, string updatedText);
         bool IsSourceAlreadyProcessed(ISource source);
+        void WriteIndex();
+
+        double Progress(int fileCount);
     }
 }

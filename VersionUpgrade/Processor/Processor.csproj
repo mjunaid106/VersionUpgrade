@@ -40,9 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Implementations\Index.cs" />
+    <Compile Include="Implementations\IndexRecord.cs" />
     <Compile Include="Implementations\Manager.cs" />
     <Compile Include="Implementations\Source.cs" />
     <Compile Include="Interfaces\IIndex.cs" />
+    <Compile Include="Interfaces\IIndexRecord.cs" />
     <Compile Include="Interfaces\IManager.cs" />
     <Compile Include="Interfaces\ISource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

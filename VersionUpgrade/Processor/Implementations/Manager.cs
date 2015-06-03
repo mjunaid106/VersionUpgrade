@@ -1,22 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Processor.Interfaces;
 
 namespace Processor.Implementations
 {
-    public class Manager : IManager
+    public class Manager : IManager, IDisposable
     {
         public ISource Source { get; set; }
         private IIndex Index;
         private static ReaderWriterLockSlim _sourceReadWriteLock;
-        private static ReaderWriterLockSlim _indexReadWriteLock;
+
+        public static List<IIndexRecord> IndexRecords { get; set; }
 
         public Manager(IIndex index)
         {
             Index = index;
             _sourceReadWriteLock = new ReaderWriterLockSlim();
-            _indexReadWriteLock = new ReaderWriterLockSlim();
+            IndexRecords = new List<IIndexRecord>();
         }
 
         public string Read()
@@ -55,57 +58,51 @@ namespace Processor.Implementations
             return string.Join(".", version);
         }
 
-        public bool Write(int threadId, string updatedText)
+        public void Write(int threadId, string updatedText)
         {
-            //try
-            //{
-            _indexReadWriteLock.EnterWriteLock();
             _sourceReadWriteLock.EnterWriteLock();
             try
             {
                 Source.WriteData(updatedText);
                 if (!IsSourceAlreadyProcessed(Source))
                 {
-                    Index.Update(threadId, Source);
+                    IndexRecords.Add(new IndexRecord(threadId, Source));
                 }
             }
             finally
             {
-                _indexReadWriteLock.ExitWriteLock();
                 _sourceReadWriteLock.ExitWriteLock();
             }
-            return true;
-            //}
-            //catch (Exception)
-            //{
-            //    return false;
-            //}
         }
 
         public bool IsSourceAlreadyProcessed(ISource source)
         {
             bool isProcessed;
-
-            //_indexReadWriteLock.EnterReadLock();
-
-            try
+            lock (IndexRecords)
             {
-                isProcessed = Index.IsSourceProcessed(source);
-            }
-            finally
-            {
-                //_indexReadWriteLock.ExitReadLock();
+                isProcessed = IndexRecords.ToList().Any(s => s.Source.RecordName.Equals(source.RecordName));
             }
             return isProcessed;
         }
 
-        //public void UpdateIndex(int thread)
-        //{
-        //    _indexReadWriteLock.EnterWriteLock();
-        //    Index.Update(thread, Source);
-        //    _indexReadWriteLock.ExitWriteLock();
-        //    _indexReadWriteLock.ExitReadLock();
-        //}
+        public void WriteIndex()
+        {
+            Index.WriteIndex(IndexRecords);
+        }
 
+        public double Progress(int fileCount)
+        {
+            double percentage;
+            lock (IndexRecords)
+            {
+                percentage = Convert.ToDouble(IndexRecords.Count()) / Convert.ToDouble(fileCount);
+            }
+            return percentage;
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

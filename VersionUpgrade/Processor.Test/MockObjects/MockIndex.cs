@@ -19,6 +19,11 @@ namespace Processor.Test.MockObjects
             throw new NotImplementedException();
         }
 
+        public void WriteIndex(IList<IIndexRecord> indexRecords)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public void RecordAlreadyProcessed(int thread, ISource source)
         {

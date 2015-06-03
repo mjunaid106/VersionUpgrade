@@ -12,23 +12,40 @@ namespace StartupApp
 {
     class Program
     {
+        public static IEnumerable<string> Files { get; set; }
         static void Main(string[] args)
         {
             Console.BufferHeight = 10000;
-            const string filePath = "C:\\Files";
+            //const string filePath = "C:\\Files";
+            string filePath = args[0];
             var index = new Index(string.Format(@"{0}\index.csv", filePath));
-            var indexWriterLockSlim = new ReaderWriterLockSlim();
-            var sourceWriterLockSlim = new ReaderWriterLockSlim();
-            var files = Directory.GetFiles(filePath, "*", SearchOption.AllDirectories).Where(f => !f.Contains("C:\\Files\\index.csv"));
+            Files = Directory.GetFiles(filePath, "*", SearchOption.AllDirectories).Where(f => !f.Contains("C:\\Files\\index.csv"));
 
             var tasks = new List<Task>();
             var manager = new Manager(index);
             for (int i = 0; i < 5; i++)
             {
-                tasks.Add(Task.Run(() => Process(Task.CurrentId, files, manager)));
+                tasks.Add(Task.Run(() => Process(Task.CurrentId, Files, manager)));
             }
-            Console.WriteLine("Total files processed: {0}", files.Count());
+            tasks.Add(Task.Run(() => Progress(manager)));
+            Task.WaitAll(tasks.ToArray());
+            manager.WriteIndex();
+            Console.WriteLine("Total files processed: {0}", Files.Count());
             Console.Read();
+
+        }
+
+        private static void Progress(Manager manager)
+        {
+            double progress = 0;
+
+            while (!progress.Equals(1.0))
+            {
+                progress = manager.Progress(Files.Count());
+                Console.Clear();
+                Console.WriteLine("{0} completed", progress.ToString("##%"));
+                Thread.Sleep(1000);
+            }
 
         }
 
@@ -36,23 +53,17 @@ namespace StartupApp
         {
             foreach (string file in files)
             {
-                Console.WriteLine("Processing file: {0}", file);
                 var source = new Source(file);
-                // bool isProcessed = manager.IsSourceAlreadyProcessed(source);
+                bool isProcessed = manager.IsSourceAlreadyProcessed(source);
 
-                //if (!isProcessed)
+                if (!isProcessed)
                 {
                     manager.Source = source;
                     var originalData = manager.Read();
                     var updatedData = manager.Update(originalData);
-                    var isSuccess = manager.Write(thread.Value, updatedData);
-                    Console.WriteLine("   Old Version: {0}", source.OldVersion);
-                    Console.WriteLine("   New Version: {0}", source.NewVersion);
-                    //if (isSuccess)
-                    //{
-                    //    manager.UpdateIndex(thread.Value);
-                    //}
+                    manager.Write(thread.HasValue ? thread.Value : 0, updatedData);
                 }
+
             }
         }
     }
