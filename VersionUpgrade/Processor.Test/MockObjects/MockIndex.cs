@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Processor.Interfaces;
 
 namespace Processor.Test.MockObjects
@@ -13,6 +10,8 @@ namespace Processor.Test.MockObjects
         {
             throw new NotImplementedException();
         }
+
+        public string FileName { get; private set; }
 
         public bool IsSourceProcessed(ISource source)
         {

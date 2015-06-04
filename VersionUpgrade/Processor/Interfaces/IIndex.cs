@@ -4,7 +4,8 @@ namespace Processor.Interfaces
 {
     public interface IIndex
     {
-        //void Update(int thread, ISource source);
+        string FileName { get; }
+
         bool IsSourceProcessed(ISource source);
 
         void WriteIndex(IList<IIndexRecord> indexRecords);

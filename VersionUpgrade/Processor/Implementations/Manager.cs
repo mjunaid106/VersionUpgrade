@@ -7,17 +7,17 @@ using Processor.Interfaces;
 
 namespace Processor.Implementations
 {
-    public class Manager : IManager, IDisposable
+    public class Manager : IManager
     {
         public ISource Source { get; set; }
-        private IIndex Index;
+        private readonly IIndex _index;
         private static ReaderWriterLockSlim _sourceReadWriteLock;
 
-        public static List<IIndexRecord> IndexRecords { get; set; }
+        public IList<IIndexRecord> IndexRecords { get; set; }
 
         public Manager(IIndex index)
         {
-            Index = index;
+            _index = index;
             _sourceReadWriteLock = new ReaderWriterLockSlim();
             IndexRecords = new List<IIndexRecord>();
         }
@@ -58,14 +58,14 @@ namespace Processor.Implementations
             return string.Join(".", version);
         }
 
-        public void Write(int threadId, string updatedText)
+        public void Write(int threadId, string updatedText, IIndexRecord indexRecord)
         {
             _sourceReadWriteLock.EnterWriteLock();
             try
             {
-                Source.WriteData(updatedText);
                 if (!IsSourceAlreadyProcessed(Source))
                 {
+                    Source.WriteData(updatedText);
                     IndexRecords.Add(new IndexRecord(threadId, Source));
                 }
             }
@@ -87,7 +87,7 @@ namespace Processor.Implementations
 
         public void WriteIndex()
         {
-            Index.WriteIndex(IndexRecords);
+            _index.WriteIndex(IndexRecords);
         }
 
         public double Progress(int fileCount)
@@ -98,11 +98,6 @@ namespace Processor.Implementations
                 percentage = Convert.ToDouble(IndexRecords.Count()) / Convert.ToDouble(fileCount);
             }
             return percentage;
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
         }
     }
 }
