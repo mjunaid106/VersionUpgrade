@@ -6,6 +6,7 @@ namespace Processor.Interfaces
     {
         ISource Source { get; set; }
         IList<IIndexRecord> IndexRecords { get; set; }
+        IIndexRecord IndexRecord { get; set; }
 
         string Read();
         string Update(string originalText);

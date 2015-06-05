@@ -30,6 +30,7 @@ namespace StartupApp
             Console.WriteLine("Writing to index");
             manager.WriteIndex();
             Console.WriteLine("Total files processed: {0}", manager.IndexRecords.Count());
+            Console.WriteLine("Check {0} for version information", index.FileName);
             Console.WriteLine("Press any key to exit..");
             Console.Read();
         }
@@ -54,12 +55,12 @@ namespace StartupApp
             {
                 var source = new Source(file);
 
-                // Extra check so that the file is not picked up by other threads.
                 bool isProcessed = manager.IsSourceAlreadyProcessed(source);
 
                 if (!isProcessed)
                 {
                     manager.Source = source;
+                    manager.IndexRecord = new IndexRecord(thread.HasValue ? thread.Value : 0, source);
                     var originalData = manager.Read();
                     var updatedData = manager.Update(originalData);
                     manager.Write(thread.HasValue ? thread.Value : 0, updatedData);

@@ -10,6 +10,7 @@ namespace Processor.Implementations
     public class Manager : IManager
     {
         public ISource Source { get; set; }
+        public IIndexRecord IndexRecord { get; set; }
         private readonly IIndex _index;
         private static ReaderWriterLockSlim _sourceReadWriteLock;
 
@@ -58,15 +59,16 @@ namespace Processor.Implementations
             return string.Join(".", version);
         }
 
-        public void Write(int threadId, string updatedText, IIndexRecord indexRecord)
+        public void Write(int threadId, string updatedText)
         {
             _sourceReadWriteLock.EnterWriteLock();
             try
             {
+                // Extra check so that the file is not picked up by other threads.
                 if (!IsSourceAlreadyProcessed(Source))
                 {
                     Source.WriteData(updatedText);
-                    IndexRecords.Add(new IndexRecord(threadId, Source));
+                    IndexRecords.Add(IndexRecord);
                 }
             }
             finally
