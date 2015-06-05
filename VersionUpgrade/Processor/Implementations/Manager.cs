@@ -15,6 +15,7 @@ namespace Processor.Implementations
         private static ReaderWriterLockSlim _sourceReadWriteLock;
 
         public IList<IIndexRecord> IndexRecords { get; set; }
+        public bool CheckIndexBeforeUpdate { get; set; }
 
         public Manager(IIndex index)
         {
@@ -65,7 +66,12 @@ namespace Processor.Implementations
             try
             {
                 // Extra check so that the file is not picked up by other threads.
-                if (!IsSourceAlreadyProcessed(Source))
+                if (CheckIndexBeforeUpdate && !IsSourceAlreadyProcessed(Source))
+                {
+                    Source.WriteData(updatedText);
+                    IndexRecords.Add(IndexRecord);
+                }
+                else if (!CheckIndexBeforeUpdate)
                 {
                     Source.WriteData(updatedText);
                     IndexRecords.Add(IndexRecord);
