@@ -15,45 +15,65 @@ namespace StartupApp
         public static IEnumerable<string> Files { get; set; }
         static void Main(string[] args)
         {
-            Console.BufferHeight = 10000;
-            string filePath = args[0];
-            int methodType = int.Parse(args[1]);
-            var index = new Index(string.Format(@"{0}\index.csv", filePath));
-            Files = Directory.GetFiles(filePath, "*", SearchOption.AllDirectories).Where(f => !f.Contains(index.FileName));
-
-            var tasks = new List<Task>();
-            IManager manager = new Manager(index);
-            tasks.Add(Task.Run(() => Progress(manager)));
-
-            var watch = new Stopwatch();
-            watch.Start();
-            if (methodType == 0)
+            if (args.Count().Equals(2))
             {
-                manager.CheckIndexBeforeUpdate = true;
-                for (int i = 0; i < 5; i++)
+
+                string filePath = args[0];
+                int methodType = int.Parse(args[1]);
+
+                Console.BufferHeight = 10000;
+
+                var index = new Index(string.Format(@"{0}\index.csv", filePath));
+                Files =
+                    Directory.GetFiles(filePath, "*", SearchOption.AllDirectories)
+                        .Where(f => !f.Contains(index.FileName));
+
+                var tasks = new List<Task>();
+                IManager manager = new Manager(index);
+                tasks.Add(Task.Run(() => Progress(manager)));
+
+                var watch = new Stopwatch();
+                watch.Start();
+                if (methodType == 0)
                 {
-                    tasks.Add(Task.Run(() => Process(Task.CurrentId.HasValue ? Task.CurrentId.Value : 0, Files, manager)));
+                    manager.CheckIndexBeforeUpdate = true;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        tasks.Add(
+                            Task.Run(() => Process(Task.CurrentId.HasValue ? Task.CurrentId.Value : 0, Files, manager)));
+                    }
                 }
+                else
+                {
+                    manager.CheckIndexBeforeUpdate = false;
+                    foreach (var file in Files)
+                    {
+                        Task task =
+                            Task.Run(() => Process(Task.CurrentId.HasValue ? Task.CurrentId.Value : 0, file, manager));
+                        tasks.Add(task);
+                    }
+                }
+
+                Task.WaitAll(tasks.ToArray());
+                Console.WriteLine("Writing to index");
+                manager.WriteIndex();
+                Console.WriteLine("Total files processed: {0}", manager.IndexRecords.Count());
+                Console.WriteLine("Check {0} for version information", index.FileName);
+                Console.WriteLine("Press any key to exit..");
+                watch.Stop();
+                Console.WriteLine("Time to complete: {0}", watch.Elapsed.TotalSeconds);
+                Console.Read();
             }
             else
             {
-                manager.CheckIndexBeforeUpdate = false;
-                foreach (var file in Files)
-                {
-                    Task task = Task.Run(() => Process(Task.CurrentId.HasValue ? Task.CurrentId.Value : 0, file, manager));
-                    tasks.Add(task);
-                }
-            }
+                Console.WriteLine("The syntax of the command is incorrect.");
+                Console.WriteLine("\nUsage:\n-------\n");
+                Console.WriteLine("VersionUpgrade.exe <File Path> <Method Number>\n");
+                Console.WriteLine("\t<File Path> = Path were files are located for e.g. C:\\Files.");
+                Console.WriteLine("\t<Method Number> = 1 for four threads, 2 for multiple threads.");
+                Console.Read();
 
-            Task.WaitAll(tasks.ToArray());
-            Console.WriteLine("Writing to index");
-            manager.WriteIndex();
-            Console.WriteLine("Total files processed: {0}", manager.IndexRecords.Count());
-            Console.WriteLine("Check {0} for version information", index.FileName);
-            Console.WriteLine("Press any key to exit..");
-            watch.Stop();
-            Console.WriteLine("Time to complete: {0}", watch.Elapsed.TotalSeconds);
-            Console.Read();
+            }
         }
 
         private static void Progress(IManager manager)

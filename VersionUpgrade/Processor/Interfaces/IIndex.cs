@@ -6,8 +6,6 @@ namespace Processor.Interfaces
     {
         string FileName { get; }
 
-        bool IsSourceProcessed(ISource source);
-
         void WriteIndex(IList<IIndexRecord> indexRecords);
     }
 }

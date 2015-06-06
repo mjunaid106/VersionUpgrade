@@ -14,7 +14,7 @@ namespace Processor.Implementations
         private readonly IIndex _index;
         private static ReaderWriterLockSlim _sourceReadWriteLock;
 
-        public IList<IIndexRecord> IndexRecords { get; set; }
+        public IList<IIndexRecord> IndexRecords { get; private set; }
         public bool CheckIndexBeforeUpdate { get; set; }
 
         public Manager(IIndex index)
@@ -88,7 +88,8 @@ namespace Processor.Implementations
             bool isProcessed;
             lock (IndexRecords)
             {
-                isProcessed = IndexRecords.ToList().Any(s => s.Source.RecordName.Equals(source.RecordName));
+                var indexAsList = IndexRecords.ToList();
+                isProcessed = indexAsList.Any(s => s.Source.RecordName.Equals(source.RecordName));
             }
             return isProcessed;
         }

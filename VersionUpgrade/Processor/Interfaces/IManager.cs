@@ -5,7 +5,7 @@ namespace Processor.Interfaces
     public interface IManager
     {
         ISource Source { get; set; }
-        IList<IIndexRecord> IndexRecords { get; set; }
+        IList<IIndexRecord> IndexRecords { get; }
         IIndexRecord IndexRecord { get; set; }
         bool CheckIndexBeforeUpdate { get; set; }
 
