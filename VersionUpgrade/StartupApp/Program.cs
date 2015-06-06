@@ -10,14 +10,14 @@ using Processor.Interfaces;
 
 namespace StartupApp
 {
-    class Program
+    internal class Program
     {
         public static IEnumerable<string> Files { get; set; }
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             if (args.Count().Equals(2))
             {
-
                 string filePath = args[0];
                 int methodType = int.Parse(args[1]);
 
@@ -46,7 +46,7 @@ namespace StartupApp
                 else
                 {
                     manager.CheckIndexBeforeUpdate = false;
-                    foreach (var file in Files)
+                    foreach (string file in Files)
                     {
                         Task task =
                             Task.Run(() => Process(Task.CurrentId.HasValue ? Task.CurrentId.Value : 0, file, manager));
@@ -72,7 +72,6 @@ namespace StartupApp
                 Console.WriteLine("\t<File Path> = Path were files are located for e.g. C:\\Files.");
                 Console.WriteLine("\t<Method Number> = 1 for four threads, 2 for multiple threads.");
                 Console.Read();
-
             }
         }
 
@@ -101,11 +100,10 @@ namespace StartupApp
                 {
                     manager.Source = source;
                     manager.IndexRecord = new IndexRecord(thread, source);
-                    var originalData = manager.Read();
-                    var updatedData = manager.Update(originalData);
+                    string originalData = manager.Read();
+                    string updatedData = manager.Update(originalData);
                     manager.Write(thread, updatedData);
                 }
-
             }
         }
 
@@ -114,8 +112,8 @@ namespace StartupApp
             var source = new Source(file);
             manager.Source = source;
             manager.IndexRecord = new IndexRecord(thread, source);
-            var originalData = manager.Read();
-            var updatedData = manager.Update(originalData);
+            string originalData = manager.Read();
+            string updatedData = manager.Update(originalData);
             manager.Write(thread, updatedData);
         }
     }

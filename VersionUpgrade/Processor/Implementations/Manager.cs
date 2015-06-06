@@ -9,13 +9,8 @@ namespace Processor.Implementations
 {
     public class Manager : IManager
     {
-        public ISource Source { get; set; }
-        public IIndexRecord IndexRecord { get; set; }
-        private readonly IIndex _index;
         private static ReaderWriterLockSlim _sourceReadWriteLock;
-
-        public IList<IIndexRecord> IndexRecords { get; private set; }
-        public bool CheckIndexBeforeUpdate { get; set; }
+        private readonly IIndex _index;
 
         public Manager(IIndex index)
         {
@@ -23,6 +18,12 @@ namespace Processor.Implementations
             _sourceReadWriteLock = new ReaderWriterLockSlim();
             IndexRecords = new List<IIndexRecord>();
         }
+
+        public ISource Source { get; set; }
+        public IIndexRecord IndexRecord { get; set; }
+
+        public IList<IIndexRecord> IndexRecords { get; private set; }
+        public bool CheckIndexBeforeUpdate { get; set; }
 
         public string Read()
         {
@@ -47,17 +48,6 @@ namespace Processor.Implementations
             string updatedString = Regex.Replace(originalText, pattern1, Incrementor, RegexOptions.IgnoreCase);
             updatedString = Regex.Replace(updatedString, pattern2, Incrementor, RegexOptions.IgnoreCase);
             return updatedString;
-        }
-
-        private string Incrementor(Match match)
-        {
-            string[] version = match.Value.Split('.');
-            version[1] = (Convert.ToInt32(version[1]) + 1).ToString();
-            string updatedVersions = string.Join(".", version);
-
-            Source.Versions(match.Value, updatedVersions);
-
-            return string.Join(".", version);
         }
 
         public void Write(int threadId, string updatedText)
@@ -88,7 +78,7 @@ namespace Processor.Implementations
             bool isProcessed;
             lock (IndexRecords)
             {
-                var indexAsList = IndexRecords.ToList();
+                List<IIndexRecord> indexAsList = IndexRecords.ToList();
                 isProcessed = indexAsList.Any(s => s.Source.RecordName.Equals(source.RecordName));
             }
             return isProcessed;
@@ -104,9 +94,20 @@ namespace Processor.Implementations
             double percentage;
             lock (IndexRecords)
             {
-                percentage = Convert.ToDouble(IndexRecords.Count()) / Convert.ToDouble(fileCount);
+                percentage = Convert.ToDouble(IndexRecords.Count())/Convert.ToDouble(fileCount);
             }
             return percentage;
+        }
+
+        private string Incrementor(Match match)
+        {
+            string[] version = match.Value.Split('.');
+            version[1] = (Convert.ToInt32(version[1]) + 1).ToString();
+            string updatedVersions = string.Join(".", version);
+
+            Source.Versions(match.Value, updatedVersions);
+
+            return string.Join(".", version);
         }
     }
 }

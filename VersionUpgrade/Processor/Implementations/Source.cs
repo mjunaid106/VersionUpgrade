@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Processor.Interfaces;
 
 namespace Processor.Implementations
@@ -7,15 +8,15 @@ namespace Processor.Implementations
     {
         private readonly string _filePath;
 
-        public string OldVersion { get; set; }
-        public string NewVersion { get; set; }
-        public string RecordName { get; set; }
-
         public Source(string filePath)
         {
             _filePath = filePath;
             RecordName = filePath;
         }
+
+        public string OldVersion { get; set; }
+        public string NewVersion { get; set; }
+        public string RecordName { get; set; }
 
         public string ReadData()
         {
@@ -29,7 +30,7 @@ namespace Processor.Implementations
                 File.WriteAllText(_filePath, updatedText);
                 return true;
             }
-            catch (System.Exception)
+            catch (Exception)
             {
                 return false;
             }

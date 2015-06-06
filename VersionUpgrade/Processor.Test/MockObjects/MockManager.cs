@@ -8,10 +8,6 @@ namespace Processor.Test.MockObjects
 {
     public class MockManager : IManager
     {
-        public ISource Source { get; set; }
-        public IIndexRecord IndexRecord { get; set; }
-        public IList<IIndexRecord> IndexRecords { get; private set; }
-        public bool CheckIndexBeforeUpdate { get; set; }
         private readonly IIndex _index;
 
         public MockManager(IIndex index)
@@ -19,6 +15,11 @@ namespace Processor.Test.MockObjects
             _index = index;
             IndexRecords = new List<IIndexRecord>();
         }
+
+        public ISource Source { get; set; }
+        public IIndexRecord IndexRecord { get; set; }
+        public IList<IIndexRecord> IndexRecords { get; private set; }
+        public bool CheckIndexBeforeUpdate { get; set; }
 
         public string Read()
         {
@@ -34,17 +35,6 @@ namespace Processor.Test.MockObjects
             return updatedString;
         }
 
-        private string Incrementor(Match match)
-        {
-            string[] version = match.Value.Split('.');
-            version[1] = (Convert.ToInt32(version[1]) + 1).ToString();
-            string updatedVersions = string.Join(".", version);
-
-            Source.Versions(match.Value, updatedVersions);
-
-            return string.Join(".", version);
-        }
-
         public void Write(int threadId, string updatedText)
         {
             IndexRecords.Add(IndexRecord);
@@ -57,12 +47,22 @@ namespace Processor.Test.MockObjects
 
         public void WriteIndex()
         {
-
         }
 
         public double Progress(int fileCount)
         {
-            return 10.0 / fileCount;
+            return 10.0/fileCount;
+        }
+
+        private string Incrementor(Match match)
+        {
+            string[] version = match.Value.Split('.');
+            version[1] = (Convert.ToInt32(version[1]) + 1).ToString();
+            string updatedVersions = string.Join(".", version);
+
+            Source.Versions(match.Value, updatedVersions);
+
+            return string.Join(".", version);
         }
     }
 }

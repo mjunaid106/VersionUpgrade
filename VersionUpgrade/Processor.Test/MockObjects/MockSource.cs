@@ -2,7 +2,7 @@
 
 namespace Processor.Test.MockObjects
 {
-    public class MockSource: ISource
+    public class MockSource : ISource
     {
         public string OldVersion { get; set; }
         public string NewVersion { get; set; }

@@ -7,14 +7,14 @@ namespace Processor.Test
     [TestClass]
     public class ManagerTests
     {
-        private ISource _source;
-        private IManager _manager;
         private IIndex _index;
+        private IManager _manager;
+        private ISource _source;
 
         [TestInitialize]
         public void Initialise()
         {
-            _source = new MockSource { OldVersion = "1.1.0", NewVersion = "1.2.0", RecordName = "InputFile.bat" };
+            _source = new MockSource {OldVersion = "1.1.0", NewVersion = "1.2.0", RecordName = "InputFile.bat"};
             _index = new MockIndex("MockIndex.csv");
             _manager = new MockManager(_index);
             _manager.Source = _source;
@@ -23,70 +23,70 @@ namespace Processor.Test
         [TestMethod]
         public void Update_WithShortVersion_FullFormat_Successful()
         {
-            var updatedString = _manager.Update("REM v1.1.0");
+            string updatedString = _manager.Update("REM v1.1.0");
             Assert.AreEqual("REM v1.2.0", updatedString);
         }
 
         [TestMethod]
         public void Update_WithShortVersion_ShortFormat_Successful()
         {
-            var updatedString = _manager.Update("REM v1.1");
+            string updatedString = _manager.Update("REM v1.1");
             Assert.AreEqual("REM v1.2", updatedString);
         }
 
         [TestMethod]
         public void Update_WithShortVersion_FullFormat_Space()
         {
-            var updatedString = _manager.Update("REM v 1.1.0");
+            string updatedString = _manager.Update("REM v 1.1.0");
             Assert.AreEqual("REM v 1.1.0", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongVersion_FullFormat_Successful()
         {
-            var updatedString = _manager.Update("REM version 1.1.0");
+            string updatedString = _manager.Update("REM version 1.1.0");
             Assert.AreEqual("REM version 1.2.0", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongVersion_ShortFormat_Successful()
         {
-            var updatedString = _manager.Update("REM version 1.1");
+            string updatedString = _manager.Update("REM version 1.1");
             Assert.AreEqual("REM version 1.2", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongVersion_FullFormat_Space()
         {
-            var updatedString = _manager.Update("REM version1.1.0");
+            string updatedString = _manager.Update("REM version1.1.0");
             Assert.AreEqual("REM version1.1.0", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongAndShortVersion_LongFormat_Successful()
         {
-            var updatedString = _manager.Update("REM v1.1.0 version 1.1.0");
+            string updatedString = _manager.Update("REM v1.1.0 version 1.1.0");
             Assert.AreEqual("REM v1.2.0 version 1.2.0", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongAndShortVersion_ShortFormat_Successful()
         {
-            var updatedString = _manager.Update("REM v1.1 version 1.1");
+            string updatedString = _manager.Update("REM v1.1 version 1.1");
             Assert.AreEqual("REM v1.2 version 1.2", updatedString);
         }
 
         [TestMethod]
         public void Update_WithLongAndShortVersion_LongAndShortFormat_Successful()
         {
-            var updatedString = _manager.Update("REM v1.1.0 version 1.1");
+            string updatedString = _manager.Update("REM v1.1.0 version 1.1");
             Assert.AreEqual("REM v1.2.0 version 1.2", updatedString);
         }
 
         [TestMethod]
         public void Write_Successful()
         {
-            _manager.IndexRecord = new MockIndexRecord { Thread = 99, Source = _source };
+            _manager.IndexRecord = new MockIndexRecord {Thread = 99, Source = _source};
             _manager.Write(99, "REM 1.2.0");
             Assert.AreEqual(1, _manager.IndexRecords.Count);
             Assert.AreEqual(99, _manager.IndexRecords[0].Thread);
@@ -98,7 +98,7 @@ namespace Processor.Test
         [TestMethod]
         public void IsSourceAlreadyProcessed_Successful()
         {
-            _manager.IndexRecord = new MockIndexRecord { Thread = 99, Source = _source };
+            _manager.IndexRecord = new MockIndexRecord {Thread = 99, Source = _source};
             _manager.Write(99, "REM 1.2.0");
             Assert.IsTrue(_manager.IsSourceAlreadyProcessed(_source));
         }
