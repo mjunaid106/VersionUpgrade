@@ -51,9 +51,12 @@
   </Choose>
   <ItemGroup>
     <Compile Include="MockObjects\MockIndex.cs" />
+    <Compile Include="MockObjects\MockIndexRecord.cs" />
+    <Compile Include="MockObjects\MockManager.cs" />
     <Compile Include="MockObjects\MockSource.cs" />
     <Compile Include="ManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SourceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Processor\Processor.csproj">
